@@ -4,11 +4,10 @@ import {
   HiOutlineHome,
   HiOutlineCurrencyDollar,
   HiOutlineUserGroup,
-  HiOutlineMail,
-  HiOutlineOfficeBuilding,
-  HiOutlineLockClosed,
   HiOutlineCog,
+  HiOutlineArrowLeft,
 } from 'react-icons/hi'; // Import Heroicons
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for internal navigation
 import Deals from './Deals'; // Component for Deals
 
 const MenuItem = ({ icon, label, isCollapsed, isActive, onClick }) => (
@@ -71,6 +70,8 @@ const Analytics = ({ metrics }) => (
 );
 
 const SideMenu = ({ isCollapsed, setIsCollapsed, activeItem, setActiveItem, theme, dashboardData }) => {
+  const navigate = useNavigate(); // Initialize the navigate function
+
   const menuItems = [
     {
       icon: <HiOutlineChartBar className="w-6 h-6" />,
@@ -91,21 +92,6 @@ const SideMenu = ({ isCollapsed, setIsCollapsed, activeItem, setActiveItem, them
       icon: <HiOutlineUserGroup className="w-6 h-6" />,
       label: 'Analytics',
       key: 'analytics',
-    },
-    {
-      icon: <HiOutlineMail className="w-6 h-6" />,
-      label: 'Messages',
-      key: 'messages',
-    },
-    {
-      icon: <HiOutlineOfficeBuilding className="w-6 h-6" />,
-      label: 'Companies',
-      key: 'companies',
-    },
-    {
-      icon: <HiOutlineLockClosed className="w-6 h-6" />,
-      label: 'Access',
-      key: 'access',
     },
     {
       icon: <HiOutlineCog className="w-6 h-6" />,
@@ -170,6 +156,25 @@ const SideMenu = ({ isCollapsed, setIsCollapsed, activeItem, setActiveItem, them
               onClick={() => setActiveItem(key)} // Call setActiveItem here
             />
           ))}
+        </div>
+
+        {/* Back to Website */}
+        <div className="px-2 mt-auto">
+          <button
+            onClick={() => navigate('/')} // Navigate to the Home page
+            className={`flex items-center p-3 rounded-lg transition-colors ${
+              theme === 'dark'
+                ? 'text-white hover:bg-gray-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <HiOutlineArrowLeft className="w-6 h-6" />
+            {!isCollapsed && (
+              <span className="ml-3 whitespace-nowrap text-sm font-medium">
+                Back to Website
+              </span>
+            )}
+          </button>
         </div>
       </motion.div>
 
