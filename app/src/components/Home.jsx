@@ -30,7 +30,7 @@ const Home = () => {
             className="text-5xl md:text-7xl font-light text-white mb-6"
             style={{ fontFamily: 'Cormorant Garamond' }}
           >
-            Welcome to EVO
+            Welcome to TECHEVO
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
