@@ -8,7 +8,11 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/cities",
+      "dest": "app.py"
+    },
+    {
+      "src": "/api/areas/(.*)",
       "dest": "app.py"
     }
   ]
