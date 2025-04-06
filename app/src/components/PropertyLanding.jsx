@@ -14,7 +14,7 @@ const PropertyLanding = () => {
     // Fetch cities from backend
     const fetchCities = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/cities');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/cities`);
         const data = await response.json();
         setCities(data);
       } catch (error) {
@@ -30,7 +30,7 @@ const PropertyLanding = () => {
     const fetchAreas = async () => {
       if (selectedCity) {
         try {
-          const response = await fetch(`http://localhost:5000/api/areas/${selectedCity}`);
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/api/areas/${selectedCity}`);
           const data = await response.json();
           setAreas(data);
           setSelectedArea(''); // Reset area selection when city changes
