@@ -3,7 +3,6 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 from datetime import datetime
-from vercel_wsgi import handle_wsgi  # <-- ADD THIS
 
 # Load environment variables
 load_dotenv()
@@ -60,6 +59,4 @@ def get_areas(city_id):
 def get_properties(city_id, area_id):
     return jsonify(PROPERTIES.get((city_id, area_id), []))
 
-# 🔥 This is the magic line to export it for Vercel:
-def handler(request, context):
-    return handle_wsgi(app, request, context)
+
