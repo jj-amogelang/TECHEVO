@@ -2,18 +2,16 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.py",
+      "src": "api/app.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/cities",
-      "dest": "app.py"
-    },
-    {
-      "src": "/api/areas/(.*)",
-      "dest": "app.py"
+      "src": "/(.*)",
+      "dest": "api/app.py"
     }
   ]
 }
+// This file is used to configure the Vercel deployment for the FastAPI application.
+// It specifies the version of Vercel to use, the build settings for the Python application,
