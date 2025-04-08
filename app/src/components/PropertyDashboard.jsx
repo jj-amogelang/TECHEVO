@@ -36,7 +36,7 @@ const PropertyDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/dashboard?city=${city}&area=${area}`
+          `${process.env.REACT_APP_API_URL}/api/dashboard?city=${city}&area=${area}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');
