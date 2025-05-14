@@ -1,11 +1,5 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from dotenv import load_dotenv
-import os
-from datetime import datetime
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -33,7 +27,6 @@ AREAS = {
     ],
 }
 
-# Sample property data (continue your PROPERTIES here...)
 PROPERTIES = {
     (1, 1): [
         {"id": 1, "name": "The Leonardo", "type": "Mixed-use", "address": "75 Maude St, Sandton", "status": "Available", "price": "R25,000,000", "beds": 3, "baths": 3, "sqm": 240, "views": 2150, "image": "./public/images/sandton/images/leonardo.avif"},
@@ -42,21 +35,44 @@ PROPERTIES = {
     ],
 }
 
-# Add your routes
 @app.route('/')
 def home():
     return jsonify({"message": "Welcome to TechEvo API"})
 
-@app.route('/cities')
+@app.route('/api/cities', methods=['GET'])
 def get_cities():
     return jsonify(CITIES)
 
-@app.route('/areas/<int:city_id>')
-def get_areas(city_id):
-    return jsonify(AREAS.get(city_id, []))
+@app.route('/api/areas/<int:city_id>', methods=['GET'])
+def get_areas_by_city(city_id):
+    areas = AREAS.get(city_id, [])
+    if not areas:
+        return jsonify({"error": "No areas found for this city"}), 404
+    return jsonify(areas)
 
-@app.route('/properties/<int:city_id>/<int:area_id>')
+@app.route('/properties/<int:city_id>/<int:area_id>', methods=['GET'])
 def get_properties(city_id, area_id):
     return jsonify(PROPERTIES.get((city_id, area_id), []))
 
+@app.route('/api/dashboard', methods=['GET'])
+def dashboard():
+    city_id = request.args.get('city', type=int)
+    area_id = request.args.get('area', type=int)
 
+    if not city_id or not area_id:
+        return jsonify({"error": "City and Area are required"}), 400
+
+    area_data = AREAS.get(city_id, [])
+    properties = PROPERTIES.get((city_id, area_id), [])
+
+    return jsonify({
+        "city_id": city_id,
+        "area_id": area_id,
+        "area_name": next((area["name"] for area in area_data if area["id"] == area_id), "Unknown Area"),
+        "area_description": "Explore the beauty of this area.",
+        "area_image": "https://via.placeholder.com/1920x1080",
+        "properties": properties
+    })
+
+if __name__ == "__main__":
+    app.run(debug=True)

@@ -39,11 +39,12 @@ const PropertyDashboard = () => {
           `${process.env.REACT_APP_API_URL}/api/dashboard?city=${city}&area=${area}`
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch dashboard data');
+          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
         }
         const data = await response.json();
         setDashboardData(data);
       } catch (error) {
+        console.error('Error fetching dashboard data:', error);
         setError(error.message); // Set the error message
       } finally {
         setLoading(false);

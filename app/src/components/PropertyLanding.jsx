@@ -25,26 +25,26 @@ const PropertyLanding = () => {
     fetchCities();
   }, []);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    // Fetch areas based on selected city
     const fetchAreas = async () => {
-      if (selectedCity) {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/api/areas/${selectedCity}`);
-          const data = await response.json();
-          setAreas(data);
-          setSelectedArea(''); // Reset area selection when city changes
-        } catch (error) {
-          console.error('Error fetching areas:', error);
-        }
-      } else {
-        setAreas([]);
+      if (!selectedCity || selectedCity === "undefined") return;
+  
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/areas/${selectedCity}`);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+        const data = await response.json();
+        setAreas(data);
         setSelectedArea('');
+      } catch (error) {
+        console.error('Error fetching areas:', error);
       }
     };
-
+  
     fetchAreas();
   }, [selectedCity]);
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
