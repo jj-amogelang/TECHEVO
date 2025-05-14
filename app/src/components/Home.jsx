@@ -16,7 +16,7 @@ const Home = () => {
           className="absolute inset-0"
         >
           <img
-            src="/images/hero-bg.jpg"
+            src="/images/background.jpeg"
             alt="Hero Background"
             className="w-full h-full object-cover"
           />
