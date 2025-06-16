@@ -1,164 +1,196 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { HiOutlineViewList, HiOutlineViewGrid } from 'react-icons/hi'; // Import icons
+import {
+  HiOutlineHome,
+  HiOutlineChartBar,
+  HiOutlineUserGroup,
+} from 'react-icons/hi';
 import SideMenu from './SideMenu';
 import PropertiesPage from './PropertiesPage';
 import AnalyticsPage from './AnalyticsPage';
 import Deals from './Deals';
-import SettingsPage from './SettingsPage'; // Import SettingsPage
+import SettingsPage from './SettingsPage';
 
 const PropertyDashboard = () => {
   const [searchParams] = useSearchParams();
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // State for error handling
-  const [isCollapsed, setIsCollapsed] = useState(false); // State for toggling SideMenu
-  const [activeItem, setActiveItem] = useState('dashboard'); // Default active item
-  const [viewMode, setViewMode] = useState('card'); // State for toggling view mode
-  const [theme, setTheme] = useState('light'); // Default theme is light
+  const [error, setError] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeItem, setActiveItem] = useState('dashboard');
+  const [viewMode, setViewMode] = useState('card');
+  const [theme, setTheme] = useState('light');
 
   const city = searchParams.get('city');
-  const area = searchParams.get('area'); // Get the selected area from the URL
-
-  const metrics = {
-    accepted_offers: { title: 'Accepted Offers', value: '120' },
-    new_deals: { title: 'New Deals', value: '45' },
-    new_leads: { title: 'New Leads', value: '80' },
-    new_offers: { title: 'New Offers', value: '60' }
-  };
+  const area = searchParams.get('area');
 
   useEffect(() => {
-    // Apply the theme to the document body
-    document.body.className = theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900';
+    document.body.className =
+      theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900';
   }, [theme]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `${process.env.REACT_APP_API_URL}/api/dashboard?city=${city}&area=${area}`
         );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-        }
-        const data = await response.json();
+        if (!res.ok) throw new Error('Failed to fetch dashboard data.');
+        const data = await res.json();
         setDashboardData(data);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setError(error.message); // Set the error message
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
       }
     };
-
-    if (city && area) {
-      fetchDashboardData();
-    }
+    if (city && area) fetchData();
   }, [city, area]);
+
+  useEffect(() => {
+    // Set active tab from query param if present
+    const tab = searchParams.get('tab');
+    if (tab) setActiveItem(tab);
+  }, [searchParams]);
+
+  const quickStats = [
+    {
+      icon: <HiOutlineHome className="w-6 h-6 text-blue-500" />,
+      label: 'Total Properties',
+      value: dashboardData?.properties?.length ?? '--',
+    },
+    {
+      icon: <HiOutlineChartBar className="w-6 h-6 text-green-500" />,
+      label: 'Avg. Value',
+      value: dashboardData?.average_value
+        ? `R${dashboardData.average_value.toLocaleString()}`
+        : '--',
+    },
+    {
+      icon: <HiOutlineUserGroup className="w-6 h-6 text-pink-500" />,
+      label: 'Active Agents',
+      value: dashboardData?.active_agents ?? '--',
+    },
+    {
+      icon: <HiOutlineChartBar className="w-6 h-6 text-yellow-500" />,
+      label: 'Deals Closed',
+      value: dashboardData?.deals_closed ?? '--',
+    },
+  ];
+
+  const renderDashboard = () => {
+    const bgImage = dashboardData?.area_background_image || '/images/background.jpeg';
+    return (
+      <section className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div
+          className="h-[320px] md:h-[400px] bg-cover bg-center relative"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        >
+          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center px-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow">
+              {dashboardData?.area_name || 'Unknown Area'}
+            </h1>
+            <p className="mt-3 text-lg md:text-xl text-white">
+              {dashboardData?.area_description || 'Discover the area’s potential.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto -mt-12 md:-mt-16 px-4 z-10 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {quickStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 text-center"
+              >
+                <div>{stat.icon}</div>
+                <div className="mt-2 text-lg font-bold">{stat.value}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+            <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+              {(dashboardData?.recent_activity ?? ['No recent activity']).map((act, i) => (
+                <li key={i} className="border-b pb-2 last:border-none">
+                  {act}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 text-center">
+            <h3 className="text-lg font-semibold mb-2">Top Performing Agent</h3>
+            <p className="text-xl font-bold text-blue-600">
+              {dashboardData?.top_agent?.name ?? '--'}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {dashboardData?.top_agent?.stats ?? 'No stats available.'}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  };
 
   const renderContent = () => {
     switch (activeItem) {
       case 'dashboard':
-        return (
-          <div
-            className="relative h-full w-full"
-            style={{
-              backgroundImage: `url(${dashboardData?.area_image || 'https://via.placeholder.com/1920x1080'})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '100vh'
-            }}
-          >
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="text-center text-white">
-                <h1 className="text-4xl font-bold mb-4">{dashboardData?.area_name || 'Unknown Area'}</h1>
-                <p className="text-lg">{dashboardData?.area_description || 'Explore the beauty of this area.'}</p>
-              </div>
-            </div>
-          </div>
-        );
+        return renderDashboard();
       case 'properties':
         return (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">Properties</h2>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-600">Set view:</span>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-full ${
-                    viewMode === 'list' ? 'bg-gray-200' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <HiOutlineViewList
-                    className={`w-6 h-6 ${
-                      viewMode === 'list' ? 'text-blue-600' : 'text-gray-600'
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => setViewMode('card')}
-                  className={`p-2 rounded-full ${
-                    viewMode === 'card' ? 'bg-gray-200' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <HiOutlineViewGrid
-                    className={`w-6 h-6 ${
-                      viewMode === 'card' ? 'text-blue-600' : 'text-gray-600'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
+          <section className="p-4 max-w-7xl mx-auto w-full">
             <PropertiesPage
               dashboardData={dashboardData}
               viewMode={viewMode}
               setViewMode={setViewMode}
             />
-          </div>
+          </section>
         );
       case 'analytics':
-        return <AnalyticsPage metrics={Object.values(metrics)} />;
+        return (
+          <section className="p-4 max-w-7xl mx-auto w-full">
+            <AnalyticsPage metrics={dashboardData?.activity_metrics ?? {}} />
+          </section>
+        );
       case 'deals':
-        return <Deals />;
+        return (
+          <section className="p-4 max-w-7xl mx-auto w-full">
+            <Deals />
+          </section>
+        );
       case 'settings':
-        return <SettingsPage theme={theme} setTheme={setTheme} />;
+        return (
+          <section className="p-4 max-w-7xl mx-auto w-full">
+            <SettingsPage theme={theme} setTheme={setTheme} />
+          </section>
+        );
       default:
-        return <p>Welcome to the Dashboard! Select a menu item to get started.</p>;
+        return <p className="p-4">Page not found.</p>;
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      {/* SideMenu */}
+    <div className="flex h-screen w-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-all">
       <SideMenu
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         activeItem={activeItem}
         setActiveItem={setActiveItem}
-        theme={theme} // Pass theme to SideMenu
+        theme={theme}
       />
-
-      {/* Main Content */}
-      <div
+      <main
         className={`flex-1 overflow-y-auto transition-all duration-300 ${
-          isCollapsed ? 'ml-16' : 'ml-64'
+          isCollapsed ? 'ml-16' : 'ml-56'
         }`}
       >
         {renderContent()}
-      </div>
+      </main>
 
-      {/* Error Message */}
       {error && (
-        <div className="fixed bottom-0 left-0 w-full bg-red-500 text-white text-center py-2">
+        <div className="fixed bottom-0 left-0 w-full bg-red-600 text-white py-2 text-center z-50">
           {error}
         </div>
       )}
